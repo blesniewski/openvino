@@ -283,6 +283,28 @@ shared_ptr<Node>
                                                        m_output_type);
 }
 
+namespace
+{
+    bool evaluate_non_max_suppression(const HostTensorVector& args,
+                                      const HostTensorPtr& out,
+                                      op::v3::NonMaxSuppression::BoxEncodingType box_encoding,
+                                      bool sort_result_descending,
+                                      element::Type output_type)
+    {
+        // TODO: templating reference function
+        // T_THRESHOLDS and T need to be somehow merged, casting to bigger type?
+        // T_IND - can be int32 or int64- can't be simplified
+    }
+} // namespace
+
+bool op::v3::NonMaxSuppression::evaluate(const HostTensorVector& outputs,
+                                         const HostTensorVector& inputs) const
+{
+    evaluate_non_max_suppression(
+        inputs, outputs[0], get_box_encoding(), get_sort_result_descending(), get_output_type());
+    return true;
+}
+
 bool ngraph::op::v3::NonMaxSuppression::visit_attributes(AttributeVisitor& visitor)
 {
     visitor.on_attribute("box_encoding", m_box_encoding);
@@ -299,6 +321,33 @@ void op::v3::NonMaxSuppression::validate()
     NODE_VALIDATION_CHECK(this,
                           m_output_type == element::i64 || m_output_type == element::i32,
                           "Output type must be i32 or i64");
+
+    NODE_VALIDATION_CHECK(this,
+                          get_input_element_type(0).is_real(),
+                          "Expected 'boxes' input tensor to have floating point type. Got:",
+                          get_input_element_type(0));
+
+    NODE_VALIDATION_CHECK(this,
+                          get_input_element_type(1) == get_input_element_type(0),
+                          "Expected 'scores' input tensor to be of the same type as 'boxes'. Got:",
+                          get_input_element_type(1));
+
+    NODE_VALIDATION_CHECK(
+        this,
+        get_input_element_type(2).is_integral(),
+        "Expected 'max_output_boxes_per_class' input tensor to have integral type. Got:",
+        get_input_element_type(2));
+
+    NODE_VALIDATION_CHECK(this,
+                          get_input_element_type(3).is_real(),
+                          "Expected 'iou_threshold' input tensor to be floating point. Got:",
+                          get_input_element_type(3));
+
+    NODE_VALIDATION_CHECK(
+        this,
+        get_input_element_type(4) == get_input_element_type(3),
+        "Expected 'score_threshold' input tensor to be of the same type as 'iou_threshold'. Got:",
+        get_input_element_type(4));
 
     if (boxes_ps.is_dynamic() || scores_ps.is_dynamic())
     {
