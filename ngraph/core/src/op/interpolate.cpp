@@ -239,10 +239,13 @@ void op::v4::Interpolate::validate_and_infer_types()
                           "Sizes element type must be i32, i64, u32 or u64");
 
     element::Type scales_et = get_input_element_type(2);
-    NODE_VALIDATION_CHECK(this,
-                          scales_et == element::f32 || scales_et == element::f16 ||
-                              scales_et == element::bf16,
-                          "Scales element type must be f32, f16 or bf16");
+    NODE_VALIDATION_CHECK(
+        this,
+        scales_et == element::f32 || scales_et == element::f16 || scales_et == element::bf16 ||
+            scales_et == element::i8 || scales_et == element::i16 || scales_et == element::i32 ||
+            scales_et == element::i64 || scales_et == element::u8 || scales_et == element::u16 ||
+            scales_et == element::u32 || scales_et == element::u64,
+        "Scales element type must be floating point or integer");
 
     if (input_values().size() == 4)
     {
