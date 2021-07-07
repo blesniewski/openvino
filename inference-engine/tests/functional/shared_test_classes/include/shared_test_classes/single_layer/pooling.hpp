@@ -63,7 +63,7 @@ public:
     static std::string getTestCaseName(testing::TestParamInfo<globalPoolLayerTestParamsSet> obj);
 
 protected:
-    void SetUp() override;
+    void SetUp() override; // some comment
 };
 
 }  // namespace LayerTestsDefinitions
